@@ -10,6 +10,7 @@
 #include "AisMessage.h"
 #include "AisMessageParser.h"
 #include "CoordinateTransformUtils.h"
+#include "general.h"
 
 using namespace std;
 
@@ -17,17 +18,17 @@ using namespace std;
 
 
 CClient::CClient(const SOCKET sClient, const sockaddr_in &addrClient) {
-	//³õÊ¼»¯±äÁ¿
+	//åˆå§‹åŒ–å˜é‡
 	m_socket = sClient;
 	m_addr = addrClient;
-	m_bConning = FALSE;
-	m_bExit = FALSE;
+	m_bConning = false;
+	m_bExit = false;
 
 }
 
 bool CClient::StartRuning() {
 	if (!licenseOK){
-		cout << "¶Ô²»Æğ£¬»ñÈ¡ÊÚÈ¨´íÎó£¬²»ÄÜÆô¶¯£¡£¡£¡" << endl;
+		cout << "å¯¹ä¸èµ·ï¼Œè·å–æˆæƒé”™è¯¯ï¼Œä¸èƒ½å¯åŠ¨ï¼ï¼ï¼" << endl;
 		return false;
 	}
 	else{
@@ -56,30 +57,30 @@ void CClient::RecvDataThread(void *pParam) {
 			{
 				int nErrCode = WSAGetLastError();
 
-				if (nErrCode == WSAEWOULDBLOCK)						//½ÓÊÕÊı¾İ»º³åÇø²»¿ÉÓÃ
+				if (nErrCode == WSAEWOULDBLOCK)						//æ¥æ”¶æ•°æ®ç¼“å†²åŒºä¸å¯ç”¨
 				{
-					sleep(TIMEFOR_THREAD_CLIENT);						//Ïß³ÌË¯ÃßµÈ´ı¿Í»§¶ËÊı¾İ
+					sleep_(TIMEFOR_THREAD_CLIENT);						//çº¿ç¨‹ç¡çœ ç­‰å¾…å®¢æˆ·ç«¯æ•°æ®
 
-					continue;											//¼ÌĞøÑ­»·
+					continue;											//ç»§ç»­å¾ªç¯
 				}
-				else if (WSAENETDOWN == nErrCode						//¿Í»§¶Ë¹Ø±ÕÁËÁ¬½Ó
+				else if (WSAENETDOWN == nErrCode						//å®¢æˆ·ç«¯å…³é—­äº†è¿æ¥
 						 || WSAETIMEDOUT == nErrCode
 						 || WSAECONNRESET == nErrCode)
 				{
-					cout << "-------¿Í»§¶Ë¹Ø±ÕÁËÁ¬½Ó:" << pClient->Getm_addr() << "|nErrCode is:" << nErrCode << "-------" << endl;
-					break;												//Ïß³ÌÍË³ö
+					cout << "-------å®¢æˆ·ç«¯å…³é—­äº†è¿æ¥:" << pClient->Getm_addr() << "|nErrCode is:" << nErrCode << "-------" << endl;
+					break;												//çº¿ç¨‹é€€å‡º
 				}
 			}
-			//¿Í»§¶Ë¹Ø±ÕÁËÁ¬½Ó
+			//å®¢æˆ·ç«¯å…³é—­äº†è¿æ¥
 			else if (retVal == 0) {
-				cout << "-------¿Í»§¶Ë¹Ø±ÕÁËÁ¬½ÓretVal=0-------" << endl;
+				cout << "-------å®¢æˆ·ç«¯å…³é—­äº†è¿æ¥retVal=0-------" << endl;
 				break;
 			}
 			else {
 				pClient->ParseData(buf);
 			}
 
-			sleep(TIMEFOR_THREAD_CLIENT);
+			sleep_(TIMEFOR_THREAD_CLIENT);
 
 #else
 			// TODO check
@@ -87,14 +88,14 @@ void CClient::RecvDataThread(void *pParam) {
 			buf[MAX_NUM_BUF] = '\0';
 			if (retVal == 0)
 			{
-				cout << "-------¿Í»§¶Ë¹Ø±ÕÁËÁ¬½Ó:" << pClient->Getm_addr() << "------" <<endl;
-				break; //Ïß³ÌÍË³ö
+				cout << "-------å®¢æˆ·ç«¯å…³é—­äº†è¿æ¥:" << pClient->Getm_addr() << "------" <<endl;
+				break; //çº¿ç¨‹é€€å‡º
 			}
 			else if(retVal == SOCKET_ERROR)
 			{
 				if (errno == EWOULDBLOCK)
 				{
-					usleep(1000 * TIMEFOR_THREAD_CLIENT);
+					sleep_(TIMEFOR_THREAD_CLIENT);
 					continue;
 				}
 				else {
@@ -102,21 +103,27 @@ void CClient::RecvDataThread(void *pParam) {
 					perror("");
 				}
 			}
+			else {
+                pClient->ParseData(buf);
+			}
+            sleep_(TIMEFOR_THREAD_CLIENT);
 #endif
 
 		}
 		catch (...) {
-			cout << "RecvDataThread²¶»ñ´íÎóÁË..." << endl;;
+			cout << "RecvDataThreadæ•è·é”™è¯¯äº†..." << endl;;
 		}
 	}
 	pClient->m_bConning = false;
-	free(pClient);
+    //cout << "CClient exit" << endl;
+    pClient->m_bExit = true;
+    //cout << "thread exit" << endl;
 	return;
 }
 
 bool CClient::ParseData(const char *pRecvData) {
 
-	//Èç¹û"byebye" »òÕß "Byebye"
+	//å¦‚æœ"byebye" æˆ–è€… "Byebye"
 	if (pRecvData == "BYEBYE"){
 		cout << "recieve byebye" << endl;
 	}
@@ -129,9 +136,9 @@ bool CClient::ParseData(const char *pRecvData) {
 				char aisMessageStr[MAX_NUM_BUF + 1] = { 0 };
 				strncpy(aisMessageStr, pRecvData, sizeof(aisMessageStr));
 				aisMessageStr[MAX_NUM_BUF] = '\0';
-				//½«»Ø³µ»»ĞĞ·û\r\n·Ö¸ô×Ö·û´®£¬½á¹ûÎªvector
+				//å°†å›è½¦æ¢è¡Œç¬¦\r\nåˆ†éš”å­—ç¬¦ä¸²ï¼Œç»“æœä¸ºvector
 				string strAisMessage(aisMessageStr);
-				//Í³Ò»´¦Àí·Ö¸ô£¬Ìí¼Ó\r\n
+				//ç»Ÿä¸€å¤„ç†åˆ†éš”ï¼Œæ·»åŠ \r\n
 				strAisMessage += "\r\n";
 				vector<string> vAisData;
 				str_utils::SplitStringStd(strAisMessage, "\r\n", vAisData);
@@ -146,7 +153,7 @@ bool CClient::ParseData(const char *pRecvData) {
 				AisMessageParser aisMessageParser;
 				AisMessage aisMessage;
 
-				// ÓÃÓÚ´æ´¢ĞèÒªÆ´½ÓµÄ×Ö·û´®
+				// ç”¨äºå­˜å‚¨éœ€è¦æ‹¼æ¥çš„å­—ç¬¦ä¸²
 				map<string, string> mapMultipleMessageClassA;
 				map<string, string> mapMultipleMessageClassB;
 
@@ -154,7 +161,7 @@ bool CClient::ParseData(const char *pRecvData) {
 				{
 					if ((str_utils::startsWith(*it, "!AIVDM") || str_utils::startsWith(*it, "!AIVDO")) && strlen((*it).c_str()) > 32 && strlen((*it).c_str()) < 83)
 					{
-						// ÅĞ¶ÏÊÇ·ñĞèÒªÆ´½Ó
+						// åˆ¤æ–­æ˜¯å¦éœ€è¦æ‹¼æ¥
 						bool flag_multiple;
 						if ((*it).c_str()[7] == '1')
 						{
@@ -168,7 +175,7 @@ bool CClient::ParseData(const char *pRecvData) {
 						int len = strlen((*it).c_str());
 						memset(messageStr, 0, 64);
 
-						// È¡µÚÎå¸ö¶ººÅºóÃæµÄĞÅÏ¢Êı¾İ
+						// å–ç¬¬äº”ä¸ªé€—å·åé¢çš„ä¿¡æ¯æ•°æ®
 						for (i = 0, j = 0, k = 0; i < len; i++)
 						{
 							if ((*it).c_str()[i] == ',')
@@ -182,7 +189,7 @@ bool CClient::ParseData(const char *pRecvData) {
 							}
 						}
 
-						//Ğ£Ñé¸ñÊ½!aaccc,x,y,z,u,c-c,v*hh,jÎª¶ººÅµÄ¸öÊı
+						//æ ¡éªŒæ ¼å¼!aaccc,x,y,z,u,c-c,v*hh,jä¸ºé€—å·çš„ä¸ªæ•°
 						if (j != 6 || (*it).c_str()[len - 3] != '*')
 						{
 							continue;
@@ -190,7 +197,7 @@ bool CClient::ParseData(const char *pRecvData) {
 
 						messageStr[k] = '\0';
 
-						// ´æÈëĞèÒªÆ´½ÓµÄÏûÏ¢ÄÚÈİ
+						// å­˜å…¥éœ€è¦æ‹¼æ¥çš„æ¶ˆæ¯å†…å®¹
 						if (flag_multiple)
 						{
 							if ((*it).c_str()[13] == 'A')
@@ -202,7 +209,7 @@ bool CClient::ParseData(const char *pRecvData) {
 								mapMultipleMessageClassB.insert(pair<string, string>((*it).substr(9, 3), messageStr));
 							}
 
-							// ÅĞ¶ÏÊÇ·ñÎª×îºóÒ»ÌõÓï¾ä£¬²»ÊÇ¼ÌĞø½ÓÊÕ£¬ÊÇÔòÆ´½Ó²¢·¢ËÍµ½½âÎöÏß³Ì
+							// åˆ¤æ–­æ˜¯å¦ä¸ºæœ€åä¸€æ¡è¯­å¥ï¼Œä¸æ˜¯ç»§ç»­æ¥æ”¶ï¼Œæ˜¯åˆ™æ‹¼æ¥å¹¶å‘é€åˆ°è§£æçº¿ç¨‹
 							if ((int)(*it).c_str()[9] < (int)(*it).c_str()[7])
 							{
 								continue;
@@ -253,26 +260,24 @@ bool CClient::ParseData(const char *pRecvData) {
 								aisMessage.getMESSAGETYPE() == 14 || aisMessage.getMESSAGETYPE() == 18 ||
 								aisMessage.getMESSAGETYPE() == 19 || aisMessage.getMESSAGETYPE() == 24)
 							{
-								// ²åÈëµ½vAISInfo£¬ÓÉÊı¾İ¿âÏß³ÌÍ³Ò»²åÈë
+								// æ’å…¥åˆ°vAISInfoï¼Œç”±æ•°æ®åº“çº¿ç¨‹ç»Ÿä¸€æ’å…¥
 								lock_guard<mutex> lockVector(mutexCache);
 								vAISInfo.push_back({++AISInitialID, aisString, aisMessage});
-								unique_lock<mutex> dbLock(mutexDBOperate);
-								condDBOperate.notify_all();
 							}
-
-
 						}
 						catch (...){
-							cout << "parseMessage²¶»ñ´íÎóÁË..." << endl;
+							cout << "parseMessageæ•è·é”™è¯¯äº†..." << endl;
 							continue;
 						}
 					}
 				}
+                unique_lock<mutex> dbLock(mutexDBOperate);
+                condDBOperate.notify_all();
 			}
 			//end iterate vAisdata
 
 			catch (...){
-				cout << "HandleData²¶»ñ´íÎóÁË..." << endl;
+				cout << "HandleDataæ•è·é”™è¯¯äº†..." << endl;
 			}
 		}
 	}
@@ -285,7 +290,7 @@ CClient::~CClient() {
 #else
 	close(m_socket);
 #endif
-	m_bExit = true;
+//cout << "destruction" << endl;
 }
 
 

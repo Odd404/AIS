@@ -1,11 +1,11 @@
-// AIS.cpp: ¶¨ÒåÓ¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£
+// AIS.cpp: å®šä¹‰åº”ç”¨ç¨‹åºçš„å…¥å£ç‚¹ã€‚
 //
 
 #include <list>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-//ÍøÂç²¿·Ö£¬²»Í¬»·¾³µÄÉèÖÃ
+//ç½‘ç»œéƒ¨åˆ†ï¼Œä¸åŒç¯å¢ƒçš„è®¾ç½®
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -13,7 +13,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-typedef size_t SOCKET
+typedef size_t SOCKET;
 #endif
 
 #include "AIS.h"
@@ -47,7 +47,7 @@ mutex				mutexDBOperate;
 condition_variable	condDBOperate;
 
 map<int, string> mapShipInfo;
-map<int, int> mapShipInfoCategory;                // ´¬Ö»ÀàĞÍmap
+map<int, int> mapShipInfoCategory;                // èˆ¹åªç±»å‹map
 map<int, string> mapNationality;
 map<int, string> mapHelpInfo;
 map<string, int> mapHelpDeviceIDToPersonID;
@@ -67,15 +67,15 @@ using namespace sql;
 
 int main() {
 	if (!InitMember()) {
-		cout << "³õÊ¼»¯È«¾Ö±äÁ¿Ê§°Ü" << endl;
+		cout << "åˆå§‹åŒ–å…¨å±€å˜é‡å¤±è´¥" << endl;
 		return false;
 	}
 	if(!InitSocket()){
-		cout << "³õÊ¼»¯SocketÊ§°Ü" << endl;
+		cout << "åˆå§‹åŒ–Socketå¤±è´¥" << endl;
 		return false;
 	}
 	if(!StartServer()){
-		cout << "´´½¨Ïß³ÌÊ§°Ü" << endl;
+		cout << "åˆ›å»ºçº¿ç¨‹å¤±è´¥" << endl;
 		return false;
 	}
 	StopService();
@@ -85,7 +85,7 @@ int main() {
 
 bool InitMember() {
 
-	// ¶ÁconfÎÄ¼şµ½È«¾Ö±äÁ¿
+	// è¯»confæ–‡ä»¶åˆ°å…¨å±€å˜é‡
 
 	try {
 		string configFilePath = path_utils::GetPath("/config/AisDaemon.conf");
@@ -102,24 +102,24 @@ bool InitMember() {
 
 	}
 	catch (...) {
-		cout << "¶ÁÈ¡ÅäÖÃÎÄ¼ş³ö´í" << endl;
+		cout << "è¯»å–é…ç½®æ–‡ä»¶å‡ºé”™" << endl;
 		return false;
 	}
 
-	// »ñÈ¡Êı¾İ¿âÁ¬½Ó
+	// è·å–æ•°æ®åº“è¿æ¥
 
 	sql::Connection *conn;
 	try {
 		conn = connPool->GetConnection();
 		if (conn == NULL) {
-			cout << "Êı¾İ¿âÁ¬½Ó¶ªÊ§£¬ÖØĞÂÁ¬½Ó" << endl;
+			cout << "æ•°æ®åº“è¿æ¥ä¸¢å¤±ï¼Œé‡æ–°è¿æ¥" << endl;
 
 			connPool = CConnPool::GetInstance();
 			conn = connPool->GetConnection();
 		}
 	}
 	catch (...) {
-		cout << "»ñÈ¡Êı¾İ¿âÁ¬½ÓÊ§°Ü" << endl;
+		cout << "è·å–æ•°æ®åº“è¿æ¥å¤±è´¥" << endl;
 		return false;
 	}
 
@@ -138,10 +138,10 @@ bool InitMember() {
 
 
 	/*
-	 * ³õÊ¼»¯£¬¶ÁÊı¾İ¿âĞÅÏ¢
+	 * åˆå§‹åŒ–ï¼Œè¯»æ•°æ®åº“ä¿¡æ¯
 	 */
 
-	// ÑéÖ¤Ö¤Êé
+	// éªŒè¯è¯ä¹¦
 
 	try {
 		sql::ResultSet *result;
@@ -152,10 +152,10 @@ bool InitMember() {
 				string remark = result->getString("Remark");
 				if (remark == "OK") {
 					licenseOK = true;
-					cout << "ÑéÖ¤Ö¤ÊéÍ¨¹ı" << endl;
+					cout << "éªŒè¯è¯ä¹¦é€šè¿‡" << endl;
 				} else {
 					licenseOK = false;
-					cout << "ÑéÖ¤Ö¤ÊéÊ§°Ü" << endl;
+					cout << "éªŒè¯è¯ä¹¦å¤±è´¥" << endl;
 					return false;
 				}
 			}
@@ -166,7 +166,7 @@ bool InitMember() {
 			}
 		}
 
-		// ³õÊ¼»¯¶ÁÈ¡ShipInfo±í£¬Éú³ÉmapShipInfoºÍmapShipInfoCategory
+		// åˆå§‹åŒ–è¯»å–ShipInfoè¡¨ï¼Œç”ŸæˆmapShipInfoå’ŒmapShipInfoCategory
 
 		result = state->executeQuery("select ID, MMSI, Category, UpdateDate from ShipInfo order by ID");
 		while (result->next()) {
@@ -186,10 +186,10 @@ bool InitMember() {
 				return false;
 			}
 		}
-		cout << "Éú³ÉmapShipInfo³É¹¦" << endl;
-		cout << "Éú³ÉmapShipInfoCategory³É¹¦" << endl;
+		cout << "ç”ŸæˆmapShipInfoæˆåŠŸ" << endl;
+		cout << "ç”ŸæˆmapShipInfoCategoryæˆåŠŸ" << endl;
 
-		// ³õÊ¼»¯¶ÁÈ¡MID2Nationality±í£¬Éú³ÉmapNationality
+		// åˆå§‹åŒ–è¯»å–MID2Nationalityè¡¨ï¼Œç”ŸæˆmapNationality
 
 		result = state->executeQuery("select MID, Nationality from MID2Nationality order by MID");
 		while (result->next()) {
@@ -205,16 +205,16 @@ bool InitMember() {
 				return false;
 			}
 		}
-		cout << "Éú³ÉmapNationality³É¹¦" << endl;
+		cout << "ç”ŸæˆmapNationalityæˆåŠŸ" << endl;
 
-		// ³õÊ¼»¯¶ÁÈ¡WindFarm±í£¬»ñÈ¡µ±Ç°WindFarmID
+		// åˆå§‹åŒ–è¯»å–WindFarmè¡¨ï¼Œè·å–å½“å‰WindFarmID
 
 		result = state->executeQuery("select ID from WindFarm where CurUsing=1");
 		while (result->next()) {
 			try {
 				curWindFarmID = result->getInt("ID");
 
-				cout << "»ñÈ¡curWindFarmID³É¹¦" << endl;
+				cout << "è·å–curWindFarmIDæˆåŠŸ" << endl;
 			}
 			catch (sql::SQLException &e) {
 				cout << "Error while reading WindFarm" << endl;
@@ -223,7 +223,7 @@ bool InitMember() {
 			}
 		}
 
-		// ³õÊ¼»¯¶ÁÈ¡HelpInfo±í,»ñÈ¡HelpDeviceID
+		// åˆå§‹åŒ–è¯»å–HelpInfoè¡¨,è·å–HelpDeviceID
 
 		result = state->executeQuery("select ID, HelpDeviceID, UpdateDate from Call4HelpInfo order by ID");
 		while (result->next()) {
@@ -234,8 +234,8 @@ bool InitMember() {
 				mapHelpInfo.insert(pair<int, string>(helpDeviceID, updateDate));
 				maxIDofHelpInfo = result->getInt("ID");
 
-				cout << "Éú³ÉmapHelpInfo³É¹¦" << endl;
-				cout << "»ñÈ¡maxIDofHelpInfo³É¹¦" << endl;
+				cout << "ç”ŸæˆmapHelpInfoæˆåŠŸ" << endl;
+				cout << "è·å–maxIDofHelpInfoæˆåŠŸ" << endl;
 			}
 			catch (sql::SQLException &e) {
 				cout << "Error while reading Call4HelpInfo" << endl;
@@ -244,7 +244,7 @@ bool InitMember() {
 			}
 		}
 
-		// ³õÊ¼»¯¶ÁÈ¡Ó¦¼±Ê¾Î»±êmap
+		// åˆå§‹åŒ–è¯»å–åº”æ€¥ç¤ºä½æ ‡map
 
 		result = state->executeQuery("select CardNo, UserID from Card2User where CardType=3 order by ID");
 		while (result->next()) {
@@ -254,7 +254,7 @@ bool InitMember() {
 
 				mapHelpDeviceIDToPersonID.insert(pair<string, int>(helpDeviceID, userID));
 
-				cout << "Éú³ÉmapHelpDeviceIDToPersonID³É¹¦" << endl;
+				cout << "ç”ŸæˆmapHelpDeviceIDToPersonIDæˆåŠŸ" << endl;
 			}
 			catch (sql::SQLException &e) {
 				cout << "Error while reading Card2User" << endl;
@@ -263,14 +263,14 @@ bool InitMember() {
 			}
 		}
 
-		// ³õÊ¼»¯¶ÁÈ¡AISInfoInitialµÄ×î´óID
+		// åˆå§‹åŒ–è¯»å–AISInfoInitialçš„æœ€å¤§ID
 
 		result = state->executeQuery("select max(ID) from AISInfoInitial");
 		while (result->next()) {
 			try {
 				AISInitialID = result->getInt(1);
 
-				cout << "»ñÈ¡AISInitialID³É¹¦" << endl;
+				cout << "è·å–AISInitialIDæˆåŠŸ" << endl;
 			}
 			catch (sql::SQLException &e) {
 				cout << "Error while reading AISInfoInitial" << endl;
@@ -286,13 +286,14 @@ bool InitMember() {
 		return false;
 	}
 	catch (...) {
-		cout << "¶ÁÈ¡Êı¾İ¿âĞÅÏ¢´íÎó" << endl;
+		cout << "è¯»å–æ•°æ®åº“ä¿¡æ¯é”™è¯¯" << endl;
 	}
 	/*
-	* ¶ÁÊı¾İ¿âÍê
+	* è¯»æ•°æ®åº“å®Œ
 	*/
 
 	clientList.clear();
+	return true;
 }
 
 bool InitSocket() {
@@ -341,7 +342,7 @@ bool InitSocket() {
 	int retVal;
 
 	serverSocket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
-	if (INVALID_SOCKET == sServer) {
+	if (INVALID_SOCKET == serverSocket) {
 		cout << "Create socket failed!" << endl;
 		perror("InitSocket");
 		return false;
@@ -368,7 +369,6 @@ bool InitSocket() {
 	}
 
 	return true;
-}
 
 #endif
 
@@ -391,7 +391,7 @@ bool StartServer() {
 void StopService(){
 	char cInput;
 
-	printf("ÊäÈëe »ò E ÍË³öÏµÍ³\n");
+	printf("è¾“å…¥e æˆ– E é€€å‡ºç³»ç»Ÿ\n");
 
 	for (; bServerRunning;)
 	{
@@ -403,15 +403,17 @@ void StopService(){
 		}
 		else
 		{
-			sleep(TIMEFOR_THREAD_EXIT);  //Ïß³ÌË¯Ãß
+			sleep_(TIMEFOR_THREAD_EXIT);  //çº¿ç¨‹ç¡çœ 
 		}
 	}
-	printf("·şÎñÆ÷ÍË³ö!\n");
+	printf("æœåŠ¡å™¨é€€å‡º!\n");
 
 	unique_lock<mutex> lock_(mutexCond);
 	bServerRunning = false;
+	//cout << "ready to wait" << endl;
 	condServer.wait(lock_);
-	sleep(TIMEFOR_THREAD_EXIT);
+	condDBOperate.notify_all();
+	sleep_(TIMEFOR_THREAD_EXIT);
 
 	return;
 }
@@ -428,39 +430,38 @@ void ExitServer(){
 }
 
 void CleanThread(){
-	for (; bServerRunning;)						//·şÎñÆ÷ÕıÔÚÔËĞĞ
+	for (; bServerRunning;)						//æœåŠ¡å™¨æ­£åœ¨è¿è¡Œ
 	{
+        sleep_(TIMEFOR_THREAD_SLEEP);
 		lock_guard<mutex> guard(mutexClientList);
 
-		//ÇåÀíÒÑ¾­¶Ï¿ªµÄÁ¬½Ó¿Í»§¶ËÄÚ´æ¿Õ¼ä
+		//æ¸…ç†å·²ç»æ–­å¼€çš„è¿æ¥å®¢æˆ·ç«¯å†…å­˜ç©ºé—´
 		auto iter = clientList.begin();
 
 		for (; iter != clientList.end();)
 		{
 			CClient *pClient = (CClient*)*iter;
 
-			if (pClient->IsExit())					//¿Í»§¶ËÏß³ÌÒÑ¾­ÍË³ö
+			if (pClient->IsExit())					//å®¢æˆ·ç«¯çº¿ç¨‹å·²ç»é€€å‡º
 			{
-				printf("¿Í»§¶ËÍË³öIP:%s\n", pClient->Getm_addr());
+				printf("å®¢æˆ·ç«¯é€€å‡ºIP:%s\n", pClient->Getm_addr());
 
-				clientList.erase(iter++);			//É¾³ı½Úµã
+				clientList.erase(iter++);			//åˆ é™¤èŠ‚ç‚¹
 
-				delete pClient;						//ÊÍ·ÅÄÚ´æ
+				delete pClient;						//é‡Šæ”¾å†…å­˜
 				pClient = NULL;
 			}
 			else
 			{
-				iter++;								//Ö¸ÕëÏÂÒÆ
+				iter++;								//æŒ‡é’ˆä¸‹ç§»
 			}
 		}
-
-		sleep(TIMEFOR_THREAD_SLEEP);
 	}
 
-	//·şÎñÆ÷Í£Ö¹¹¤×÷
+	//æœåŠ¡å™¨åœæ­¢å·¥ä½œ
 	if (!bServerRunning)
 	{
-		//¶Ï¿ªÃ¿¸öÁ¬½Ó£¬Ïß³ÌÍË³ö
+		//æ–­å¼€æ¯ä¸ªè¿æ¥ï¼Œçº¿ç¨‹é€€å‡º
 		unique_lock<mutex> lock(mutexClientList);
 		list<CClient *>::iterator iter = clientList.begin();
 
@@ -468,7 +469,7 @@ void CleanThread(){
 		{
 			CClient *pClient = (CClient *)*iter;
 
-			//Èç¹û¿Í»§¶ËµÄÁ¬½Ó»¹´æÔÚ£¬Ôò¶Ï¿ªÁ¬½Ó£¬Ïß³ÌÍË³ö
+			//å¦‚æœå®¢æˆ·ç«¯çš„è¿æ¥è¿˜å­˜åœ¨ï¼Œåˆ™æ–­å¼€è¿æ¥ï¼Œçº¿ç¨‹é€€å‡º
 			if (pClient->IsConning())
 			{
 				pClient->DisConning();
@@ -478,14 +479,14 @@ void CleanThread(){
 		}
 
 		lock.unlock();
-		//¸øÁ¬½Ó¿Í»§¶ËÏß³ÌÊ±¼ä£¬Ê¹Æä×Ô¶¯ÍË³ö
-		sleep(TIMEFOR_THREAD_SLEEP);
+		//ç»™è¿æ¥å®¢æˆ·ç«¯çº¿ç¨‹æ—¶é—´ï¼Œä½¿å…¶è‡ªåŠ¨é€€å‡º
+		sleep_(TIMEFOR_THREAD_SLEEP);
 
 		lock.lock();
-		//È·±£ÎªÃ¿¸ö¿Í»§¶Ë·ÖÅäµÄÄÚ´æ¿Õ¼ä¶¼»ØÊÕ
-		//Èç¹û²»¼ÙÈçwhile Õâ²ãÑ­»·£¬¿ÉÄÜ´æÔÚÕâÑùµÄÇé¿ö£¬µ±pClient->IsExit()Ê±
-		//¸ÃÏß³Ì»¹Ã»ÓĞÍË³ö
-		//ÄÇÃ´¾ÍĞèÒª´ÓÁ´±íµÄ¿ªÊ¼²¿·ÖÖØĞÂÅĞ¶Ï¡£
+		//ç¡®ä¿ä¸ºæ¯ä¸ªå®¢æˆ·ç«¯åˆ†é…çš„å†…å­˜ç©ºé—´éƒ½å›æ”¶
+		//å¦‚æœä¸å‡å¦‚while è¿™å±‚å¾ªç¯ï¼Œå¯èƒ½å­˜åœ¨è¿™æ ·çš„æƒ…å†µï¼Œå½“pClient->IsExit()æ—¶
+		//è¯¥çº¿ç¨‹è¿˜æ²¡æœ‰é€€å‡º
+		//é‚£ä¹ˆå°±éœ€è¦ä»é“¾è¡¨çš„å¼€å§‹éƒ¨åˆ†é‡æ–°åˆ¤æ–­ã€‚
 		while (0 != clientList.size())
 		{
 			iter = clientList.begin();
@@ -494,79 +495,125 @@ void CleanThread(){
 			{
 				CClient *pClient = (CClient *)*iter;
 
-				if (pClient->IsExit())				//¿Í»§¶ËÏß³ÌÒÑ¾­ÍË³ö
+				if (pClient->IsExit())				//å®¢æˆ·ç«¯çº¿ç¨‹å·²ç»é€€å‡º
 				{
-					clientList.erase(iter++);		//É¾³ı½Úµã
+					clientList.erase(iter++);		//åˆ é™¤èŠ‚ç‚¹
 
-					delete pClient;					//ÊÍ·ÅÄÚ´æ¿Õ¼ä
+					delete pClient;					//é‡Šæ”¾å†…å­˜ç©ºé—´
 					pClient = NULL;
 				}
 				else
 				{
-					iter++;							//Ö¸ÕëÏÂÒÆ
+					iter++;							//æŒ‡é’ˆä¸‹ç§»
 				}
 			}
 
-			//¸øÁ¬½Ó¿Í»§¶ËÏß³ÌÊ±¼ä£¬Ê¹Æä×Ô¶¯ÍË³ö
-			sleep(TIMEFOR_THREAD_SLEEP);
+			//ç»™è¿æ¥å®¢æˆ·ç«¯çº¿ç¨‹æ—¶é—´ï¼Œä½¿å…¶è‡ªåŠ¨é€€å‡º
+			sleep_(TIMEFOR_THREAD_SLEEP);
 		}
 		lock.unlock();
 
 	}
 
-	clientList.clear();								//Çå¿ÕÁ´±í
+	clientList.clear();								//æ¸…ç©ºé“¾è¡¨
 
 	unique_lock<mutex> lock(mutexCond);
 	condServer.notify_all();
-
+    //cout << "notify" << endl;
 	return;
 }
 
 void AcceptThread(){
 
 #ifdef WIN32
-	//WindowsÏÂ
+	//Windowsä¸‹
 
-	SOCKET sAccept;															//½ÓÊÜ¿Í»§¶ËÁ¬½ÓµÄÌ×½Ó×Ö
-	sockaddr_in addrClient;													//¿Í»§¶ËSOCKETµØÖ·
+	SOCKET sAccept;															//æ¥å—å®¢æˆ·ç«¯è¿æ¥çš„å¥—æ¥å­—
+	sockaddr_in addrClient;													//å®¢æˆ·ç«¯SOCKETåœ°å€
 
-	for (; bServerRunning;)													//·şÎñÆ÷×´Ì¬
+	for (; bServerRunning;)													//æœåŠ¡å™¨çŠ¶æ€
 	{
-		memset(&addrClient, 0, sizeof(sockaddr_in));                    //³õÊ¼»¯
+		memset(&addrClient, 0, sizeof(sockaddr_in));                    //åˆå§‹åŒ–
 
-		int lenClient = sizeof(sockaddr_in);                                //µØÖ·³¤¶È
-		sAccept = accept(serverSocket, (sockaddr *) &addrClient, &lenClient);    //½ÓÊÜ¿Í»§¶ËÇëÇó
+		int lenClient = sizeof(sockaddr_in);                                //åœ°å€é•¿åº¦
+		sAccept = accept(serverSocket, (sockaddr *) &addrClient, &lenClient);    //æ¥å—å®¢æˆ·ç«¯è¯·æ±‚
 		if (sAccept == INVALID_SOCKET) {
 			int nErrCode = WSAGetLastError();
 			if (nErrCode == WSAEWOULDBLOCK) {
-				sleep(TIMEFOR_THREAD_SLEEP);
+				sleep_(TIMEFOR_THREAD_SLEEP);
 			}
 			else {
 				return;
 			}
 		}
 		else {
-			CClient *pClient = new CClient(sAccept, addrClient);            //´´½¨¿Í»§¶Ë¶ÔÏó
+			CClient *pClient = new CClient(sAccept, addrClient);            //åˆ›å»ºå®¢æˆ·ç«¯å¯¹è±¡
 			string::size_type idx = whiteList4ClientIP.find(pClient->Getm_addr());
 
 			if (idx == string::npos) {
-				printf_s("acceptÇëÇóÊ§°Ü£¬IP£º%s Îª·Ç·¨ÇëÇó£¡\n", pClient->Getm_addr());
-				sleep(TIMEFOR_THREAD_SLEEP);
-				continue;                                                    //¼ÌĞøµÈ´ı
+				printf_s("acceptè¯·æ±‚å¤±è´¥ï¼ŒIPï¼š%s ä¸ºéæ³•è¯·æ±‚ï¼\n", pClient->Getm_addr());
+				sleep_(TIMEFOR_THREAD_SLEEP);
+				continue;                                                    //ç»§ç»­ç­‰å¾…
 			}
 
-			printf_s("acceptÇëÇó³É¹¦£¡IP£º%s\n", pClient->Getm_addr());
+			printf_s("acceptè¯·æ±‚æˆåŠŸï¼IPï¼š%s\n", pClient->Getm_addr());
 
 			lock_guard<mutex> guard(mutexClientList);
-			clientList.push_back(pClient);                                    //¼ÓÈëÁ´±í
-			pClient->StartRuning();                                            //Îª½ÓÊÜµÄ¿Í»§¶Ë½¨Á¢½ÓÊÕÊı¾İºÍ·¢ËÍÊı¾İÏß³Ì
+			clientList.push_back(pClient);                                    //åŠ å…¥é“¾è¡¨
+			pClient->StartRuning();                                            //ä¸ºæ¥å—çš„å®¢æˆ·ç«¯å»ºç«‹æ¥æ”¶æ•°æ®å’Œå‘é€æ•°æ®çº¿ç¨‹
 		}
 	}
 #else
-	//LinuxÏÂ
+	//Linuxä¸‹
 	// TODO
 
+    SOCKET sAccept;															//æ¥å—å®¢æˆ·ç«¯è¿æ¥çš„å¥—æ¥å­—
+    sockaddr_in addrClient;													//å®¢æˆ·ç«¯SOCKETåœ°å€
 
+    for (; bServerRunning;)													//æœåŠ¡å™¨çŠ¶æ€
+    {
+        memset(&addrClient, 0, sizeof(sockaddr_in));						//åˆå§‹åŒ–
+
+        socklen_t lenClient = sizeof(sockaddr_in);								//åœ°å€é•¿åº¦
+        sAccept = accept(serverSocket, (sockaddr*)&addrClient, &lenClient);		//æ¥å—å®¢æˆ·ç«¯è¯·æ±‚
+
+        if (INVALID_SOCKET == sAccept)
+        {
+            if (errno == EWOULDBLOCK)								//æ— æ³•ç«‹å³å®Œæˆä¸€ä¸ªéé˜»æŒ¡æ€§å¥—æ¥å­—æ“ä½œ
+            {
+                sleep_(TIMEFOR_THREAD_SLEEP);
+                continue;													//ç»§ç»­ç­‰å¾…
+            }
+            else
+            {
+                cout << "Accept socket error:" << strerror(errno) << " (errno:)" << errno << endl;
+                return;													//çº¿ç¨‹é€€å‡º
+            }
+        }
+        else																//æ¥å—å®¢æˆ·ç«¯çš„è¯·æ±‚
+        {
+            CClient* pClient = new CClient(sAccept, addrClient);			//åˆ›å»ºå®¢æˆ·ç«¯å¯¹è±¡
+            string::size_type idx = whiteList4ClientIP.find(pClient->Getm_addr());
+
+            if (idx == string::npos)
+            {
+                printf("acceptè¯·æ±‚å¤±è´¥ï¼ŒIPï¼š%s ä¸ºéæ³•è¯·æ±‚ï¼\n", pClient->Getm_addr());
+
+                sleep_(TIMEFOR_THREAD_SLEEP);
+
+                continue;													//ç»§ç»­ç­‰å¾…
+            }
+
+            printf("acceptè¯·æ±‚æˆåŠŸï¼IPï¼š%s\n", pClient->Getm_addr());
+
+            lock_guard<mutex> lock_(mutexClientList);
+            clientList.push_back(pClient);									//åŠ å…¥é“¾è¡¨
+            pClient->StartRuning();											//ä¸ºæ¥å—çš„å®¢æˆ·ç«¯å»ºç«‹æ¥æ”¶æ•°æ®å’Œå‘é€æ•°æ®çº¿ç¨‹
+            //cout << "begin running" << endl;
+        }
+    }
+
+    return;  //çº¿ç¨‹é€€å‡º
 #endif
 
 }
@@ -576,14 +623,14 @@ void DBOperateThread() {
 	try {
 		conn = connPool->GetConnection();
 		if (conn == NULL) {
-			cout << "Êı¾İ¿âÁ¬½Ó¶ªÊ§£¬ÖØĞÂÁ¬½Ó" << endl;
+			cout << "æ•°æ®åº“è¿æ¥ä¸¢å¤±ï¼Œé‡æ–°è¿æ¥" << endl;
 
 			connPool = CConnPool::GetInstance();
 			conn = connPool->GetConnection();
 		}
 	}
 	catch (...) {
-		cout << "»ñÈ¡Êı¾İ¿âÁ¬½ÓÊ§°Ü" << endl;
+		cout << "è·å–æ•°æ®åº“è¿æ¥å¤±è´¥" << endl;
 		return;
 	}
 	sql::Statement * state = conn->createStatement();
@@ -598,7 +645,7 @@ void DBOperateThread() {
 			for (auto iter = vAISInfo.begin(); iter != vAISInfo.end(); ++iter) {
 				AisMessage aisMessage = iter->aisMessage;
 
-				// ¹ıÂËÊı¾İÖ®Ç°£¬ÏÈ°ÑÊı¾İ¼ÇÂ¼µ½AISInfoInitial
+				// è¿‡æ»¤æ•°æ®ä¹‹å‰ï¼Œå…ˆæŠŠæ•°æ®è®°å½•åˆ°AISInfoInitial
 				try{
 					char sql[1024] = {0};
 					snprintf(sql, sizeof(sql),"insert into AISInfoInitial (ID, AISInitData, IDXDate) values "
@@ -608,27 +655,27 @@ void DBOperateThread() {
 						state->executeUpdate(sql);
 					}
 					else{
-						cout << "²åÈë±í AISInfoInitial Ê§°Ü£¬Á¬½Ó¶ªÊ§" << endl;
+						cout << "æ’å…¥è¡¨ AISInfoInitial å¤±è´¥ï¼Œè¿æ¥ä¸¢å¤±" << endl;
 						continue;
 					}
 				}
 				catch (sql::SQLException& e) {
-					cout << "²åÈëµ½ AISInfoInitial ´íÎó" << endl;
+					cout << "æ’å…¥åˆ° AISInfoInitial é”™è¯¯" << endl;
 					cout << e.what() << endl;
 				}
 				catch (...){
-					cout << "²åÈëµ½ AISInfoInitial ´íÎó" << endl;
+					cout << "æ’å…¥åˆ° AISInfoInitial é”™è¯¯" << endl;
 				}
 
-				// ¹ıÂËÎŞĞ§Êı¾İ
+				// è¿‡æ»¤æ— æ•ˆæ•°æ®
 				if (aisMessage.getMMSI() == 0) {
-					cout << "MMSIÎŞĞ§!" << endl;
+					cout << "MMSIæ— æ•ˆ!" << endl;
 					continue;
 				}
 				CoordinateTransformUtils transform;
 				Coordinate lnglat = transform.wgs84todb09(aisMessage.getLON(), aisMessage.getLAT());
 
-				// ¼ÆËã¾àÀë£¬maxDistance2WindFarm kmÒÔÍâµÄÏûÏ¢¶ªÆú²»´æÈë
+				// è®¡ç®—è·ç¦»ï¼ŒmaxDistance2WindFarm kmä»¥å¤–çš„æ¶ˆæ¯ä¸¢å¼ƒä¸å­˜å…¥
 				double real_distance =
 						transform.RealDistance(windFarm_longitude, windFarm_latitude, lnglat.lng, lnglat.lat) /
 						1000;
@@ -641,7 +688,7 @@ void DBOperateThread() {
 															  aisMessage.getMESSAGETYPE() == 18 ||
 															  aisMessage.getMESSAGETYPE() == 19 ||
 															  aisMessage.getMESSAGETYPE() == 24)) {
-					cout << "¾àÀë" << maxDistance2WindFarm << "kmÒÔÍâµÄÏûÏ¢:" << real_distance << endl;
+					cout << "è·ç¦»" << maxDistance2WindFarm << "kmä»¥å¤–çš„æ¶ˆæ¯:" << real_distance << endl;
 
 					continue;
 				}
@@ -657,7 +704,7 @@ void DBOperateThread() {
 				snprintf(lat09, sizeof(lat), "%3.8lf", lnglat.lat);
 				
 
-				// Èç¹ûmapNationalityÃ»ÓĞÕâ¸öMID¶ÔÓ¦¹ú¼Ò£¬Ôò²åÈë¸ñÊ½ÎªMID:xxx
+				// å¦‚æœmapNationalityæ²¡æœ‰è¿™ä¸ªMIDå¯¹åº”å›½å®¶ï¼Œåˆ™æ’å…¥æ ¼å¼ä¸ºMID:xxx
 				string Nationality;
 				string mid = str_utils::toString(aisMessage.getMMSI()).substr(0, 3);
 				int Mid = atoi(mid.c_str());
@@ -675,13 +722,13 @@ void DBOperateThread() {
 
 				string shipName = aisMessage.getVESSELNAME();
 
-				// ±ãÓÚsqlÓï¾ä²åÈë
+				// ä¾¿äºsqlè¯­å¥æ’å…¥
 				str_utils::replace_all(shipName, "'", "-");
 				str_utils::replace_all(shipName, "@", "");
 				str_utils::replace_all(shipName, "%", "_");
 				shipName = str_utils::trim(shipName, " ");
 				
-				// MMSIºÅÒÔ972¿ªÊ¼Ê±¸üĞÂCall4HelpInfo±í: ÓĞÔò¸üĞÂ£¬ÎŞÔò²åÈë£¬Í¬²½¸üĞÂmapHelpInfo
+				// MMSIå·ä»¥972å¼€å§‹æ—¶æ›´æ–°Call4HelpInfoè¡¨: æœ‰åˆ™æ›´æ–°ï¼Œæ— åˆ™æ’å…¥ï¼ŒåŒæ­¥æ›´æ–°mapHelpInfo
 				if (str_utils::startsWith(str_utils::toString(aisMessage.getMMSI()), "972")) {
 					string helpDeviceID = str_utils::toString(aisMessage.getMMSI());
 					string helpInfo = aisMessage.getSAFETYMESSAGE();
@@ -693,10 +740,10 @@ void DBOperateThread() {
 						personnelID = "-1";
 					}
 
-					// ÎŞÔò²åÈë
+					// æ— åˆ™æ’å…¥
 					if(mapHelpInfo.count(aisMessage.getMMSI()) == 0){
 						char sqlData[1024] = { 0 };
-						// 1ÀàĞÍµÄ°²È«ÏûÏ¢
+						// 1ç±»å‹çš„å®‰å…¨æ¶ˆæ¯
 						if(aisMessage.getMESSAGETYPE() == 1){
 							snprintf(sqlData, sizeof(sqlData),"insert into Call4HelpInfo (ID, HelpType, LON, LAT, LON09, LAT09, WindFarmID, RecordStatus, ReadTime) "
 											 "values (%s, 1, %s, %s, %s, %s, %s, 1, '%s')",
@@ -709,7 +756,7 @@ void DBOperateThread() {
 											 time_utils::NowtimeString().c_str());
 
 						}
-						// 14ÀàĞÍµÄ°²È«ĞÅÏ¢
+						// 14ç±»å‹çš„å®‰å…¨ä¿¡æ¯
 						else if(aisMessage.getMESSAGETYPE() == 14) {
 							snprintf(sqlData, sizeof(sqlData),"insert into Call4HelpInfo (ID, PersonnelID, HelpInfo, HelpDeviceID, WindFarmID, RecordStatus, ReadTime) "
 											"values (%s, %s, '%s', '%s', %s, 1, '%s')",
@@ -720,23 +767,23 @@ void DBOperateThread() {
 									 to_string(windFarmID).c_str(),
 									 time_utils::NowtimeString().c_str());
 						}
-						// ÆäËûÉáÆú
+						// å…¶ä»–èˆå¼ƒ
 						else{
-							cout << "²åÈëCall4HelpInfo±í£ºÎŞĞ§µÄÏûÏ¢ÀàĞÍ£º" << aisMessage.getMESSAGETYPE() << endl;
+							cout << "æ’å…¥Call4HelpInfoè¡¨ï¼šæ— æ•ˆçš„æ¶ˆæ¯ç±»å‹ï¼š" << aisMessage.getMESSAGETYPE() << endl;
 							continue;
 						}
-						// Ö´ĞĞsql
+						// æ‰§è¡Œsql
 						try {
 							if (conn != NULL && !conn->isClosed()) {
 								state->executeUpdate(sqlData);
 
 								mapHelpInfo.insert(pair<int, string>(aisMessage.getMMSI(), str_utils::toString(aisMessage.getDATETIME())));
 
-								cout << "²åÈë±íCall4HelpInfoÊı¾İ³É¹¦" << endl;
+								cout << "æ’å…¥è¡¨Call4HelpInfoæ•°æ®æˆåŠŸ" << endl;
 								continue;
 							}
 							else {
-								cout << "²åÈë±íCall4HelpInfoÊ§°Ü£¬Á¬½Ó¶ªÊ§" << endl;
+								cout << "æ’å…¥è¡¨Call4HelpInfoå¤±è´¥ï¼Œè¿æ¥ä¸¢å¤±" << endl;
 								continue;
 							}
 						}
@@ -744,10 +791,10 @@ void DBOperateThread() {
 							cout << e.what() << endl;
 						}
 					}
-					// ÓĞÔò¸üĞÂ
+					// æœ‰åˆ™æ›´æ–°
 					else {
 						char sqlData[1024] = {0};
-						// 1ÀàĞÍµÄ°²È«ÏûÏ¢
+						// 1ç±»å‹çš„å®‰å…¨æ¶ˆæ¯
 						if(aisMessage.getMESSAGETYPE() == 1){
 							snprintf(sqlData, sizeof(sqlData),
 									 "update Call4HelpInfo set HelpType='1', PersonnelID=%s, LON=%s, LAT=%s, LON09=%s, LAT09=%s, UpdateDate='%s', RecordStatus=1 where HelpDeviceID='%s'",
@@ -759,7 +806,7 @@ void DBOperateThread() {
 									 time_utils::NowtimeString().c_str(),
 									 helpDeviceID.c_str());
 						}
-						// 14ÀàĞÍµÄ°²È«ĞÅÏ¢
+						// 14ç±»å‹çš„å®‰å…¨ä¿¡æ¯
 						else if(aisMessage.getMESSAGETYPE() == 14){
 							snprintf(sqlData, sizeof(sqlData),
 									 "update Call4HelpInfo set PersonnelID=%s,HelpInfo='%s',UpdateDate='%s' where HelpDeviceID='%s'",
@@ -768,20 +815,20 @@ void DBOperateThread() {
 									 time_utils::NowtimeString().c_str(),
 									 helpDeviceID.c_str());
 						}
-						// ÆäËûÉáÆú
+						// å…¶ä»–èˆå¼ƒ
 						else{
-							cout << "¸üĞÂCall4HelpInfo±í£ºÎŞĞ§µÄÏûÏ¢ÀàĞÍ£º" << aisMessage.getMESSAGETYPE() << endl;
+							cout << "æ›´æ–°Call4HelpInfoè¡¨ï¼šæ— æ•ˆçš„æ¶ˆæ¯ç±»å‹ï¼š" << aisMessage.getMESSAGETYPE() << endl;
 							continue;
 						}
-						// Ö´ĞĞsql
+						// æ‰§è¡Œsql
 						try {
 							if (conn != NULL && !conn->isClosed()) {
 								state->executeUpdate(sqlData);
 								mapHelpInfo[aisMessage.getMMSI()] = aisMessage.getDATETIME();
-								cout << "¸üĞÂ±íCall4HelpInfoÊı¾İ³É¹¦" << endl;
+								cout << "æ›´æ–°è¡¨Call4HelpInfoæ•°æ®æˆåŠŸ" << endl;
 							}
 							else {
-								cout << "¸üĞÂ±íCall4HelpInfoÊ§°Ü£¬Á¬½Ó¶ªÊ§" << endl;
+								cout << "æ›´æ–°è¡¨Call4HelpInfoå¤±è´¥ï¼Œè¿æ¥ä¸¢å¤±" << endl;
 								continue;
 							}
 						}
@@ -791,12 +838,12 @@ void DBOperateThread() {
 					}
 				}
 
-				// ³£¹æMMSIºÅ£¬¸üĞÂShipInfo±í£ºÓĞÔò¸üĞÂ£¬ÎŞÔò²åÈë£¬²¢Í¬²½¸üĞÂmapShipInfo
+				// å¸¸è§„MMSIå·ï¼Œæ›´æ–°ShipInfoè¡¨ï¼šæœ‰åˆ™æ›´æ–°ï¼Œæ— åˆ™æ’å…¥ï¼Œå¹¶åŒæ­¥æ›´æ–°mapShipInfo
 				else{
-					// ÎŞÔò²åÈë
+					// æ— åˆ™æ’å…¥
 					if (mapShipInfo.count(aisMessage.getMMSI()) == 0) {
 						char sqlData[1024] = {0};
-						// ¹ıÂËµô¾­Î³¶ÈÎª0£¬ÒÔÏÂÏûÏ¢ÀàĞÍ¿ÉÍ¨¹ı
+						// è¿‡æ»¤æ‰ç»çº¬åº¦ä¸º0ï¼Œä»¥ä¸‹æ¶ˆæ¯ç±»å‹å¯é€šè¿‡
 						if (aisMessage.getLON() >= 0.0 && aisMessage.getVESSELTYPEINT() >=0 &&
 							(aisMessage.getMESSAGETYPE() == 1 || aisMessage.getMESSAGETYPE() == 2 ||
 							 aisMessage.getMESSAGETYPE() == 3 || aisMessage.getMESSAGETYPE() == 5 ||
@@ -826,20 +873,20 @@ void DBOperateThread() {
 									 time_utils::NowtimeString().c_str());
 						}
 						else{
-							cout << "²åÈë±í ShipInfo Ê§°Ü" << endl;
-							cout << "ÎŞĞ§¾­Î³¶È£º" << aisMessage.getLON() << "£¬»ò´¬²°ÀàĞÍ£º" << aisMessage.getVESSELTYPEINT() << "£¬»òÏûÏ¢ÀàĞÍ£º" << aisMessage.getMESSAGETYPE() << endl;
+							cout << "æ’å…¥è¡¨ ShipInfo å¤±è´¥" << endl;
+							cout << "æ— æ•ˆç»çº¬åº¦ï¼š" << aisMessage.getLON() << "ï¼Œæˆ–èˆ¹èˆ¶ç±»å‹ï¼š" << aisMessage.getVESSELTYPEINT() << "ï¼Œæˆ–æ¶ˆæ¯ç±»å‹ï¼š" << aisMessage.getMESSAGETYPE() << endl;
 							cout << iter->aisInitial << endl;
 							continue;
 						}
-						// Ö´ĞĞsql
+						// æ‰§è¡Œsql
 						try {
 							if (conn != NULL && !conn->isClosed()) {
 								state->executeUpdate(sqlData);
 								mapShipInfo.insert(pair<int, string>(aisMessage.getMMSI(), to_string(aisMessage.getDATETIME())));
-								cout << "²åÈë±í ShipInfo Êı¾İ³É¹¦" << endl;
+								cout << "æ’å…¥è¡¨ ShipInfo æ•°æ®æˆåŠŸ" << endl;
 							}
 							else {
-								cout << "²åÈë±í ShipInfo Ê§°Ü£¬Á¬½Ó¶ªÊ§" << endl;
+								cout << "æ’å…¥è¡¨ ShipInfo å¤±è´¥ï¼Œè¿æ¥ä¸¢å¤±" << endl;
 								continue;
 							}
 						}
@@ -848,15 +895,15 @@ void DBOperateThread() {
 						}
 						
 					}
-					// ÓĞÔò¸üĞÂ
+					// æœ‰åˆ™æ›´æ–°
 					else{
 						char sqlData[1024] = {0};
-						// °´ÏûÏ¢ÀàĞÍ²åÈë
+						// æŒ‰æ¶ˆæ¯ç±»å‹æ’å…¥
 						if(aisMessage.getLON() >= 0.0 &&
 						(aisMessage.getMESSAGETYPE() == 1 || aisMessage.getMESSAGETYPE() == 2 ||
 						aisMessage.getMESSAGETYPE() == 3 || aisMessage.getMESSAGETYPE() == 18))
 						{
-							// todo: activing? Æ´´íÁË£¿
+							// todo: activing? æ‹¼é”™äº†ï¼Ÿ
 							snprintf(sqlData, sizeof(sqlData),
 									 "update ShipInfo set TrueHeading=%s, ROT=%s, SOG=%s, ShipHead=%s, NavStatus='%s', LON=%s, LAT=%s, LON09=%s, LAT09=%s, UpdateDate='%s', Nationality='%s', ShipName='%s', Activing=1 where MMSI=%s",
 									 to_string((int)aisMessage.getTRUE_HEADING()).c_str(),
@@ -873,7 +920,7 @@ void DBOperateThread() {
 									 shipName.c_str(),
 									 to_string(aisMessage.getMMSI()).c_str());
 						}
-						// ¾²Ì¬Î»ÖÃ
+						// é™æ€ä½ç½®
 						else if (aisMessage.getMESSAGETYPE() == 5){
 							snprintf(sqlData, sizeof(sqlData),
 									 "update ShipInfo set CallSign='%s', ShipName='%s', ShipType=%s, ETA='%s', Draught=%s, Destination='%s', UpdateDate='%s' where MMSI=%s",
@@ -886,7 +933,7 @@ void DBOperateThread() {
 									 time_utils::NowtimeString().c_str(),
 									 to_string(aisMessage.getMMSI()).c_str());
 						}
-						// °²È«¹ã²¥ĞÅÏ¢
+						// å®‰å…¨å¹¿æ’­ä¿¡æ¯
 						else if (aisMessage.getMESSAGETYPE() == 14){
 							snprintf(sqlData, sizeof(sqlData),
 									 "update ShipInfo set SafetyMessage='%s', UpdateDate='%s' where MMSI=%s",
@@ -894,7 +941,7 @@ void DBOperateThread() {
 									 time_utils::NowtimeString().c_str(),
 									 to_string(aisMessage.getMMSI()).c_str());
 						}
-						// À©Õ¹BÀàÉè±¸Î»ÖÃ±¨¸æ
+						// æ‰©å±•Bç±»è®¾å¤‡ä½ç½®æŠ¥å‘Š
 						else if(aisMessage.getMESSAGETYPE() == 19){
 							snprintf(sqlData, sizeof(sqlData),
 									 "update ShipInfo set SOG=%s, ShipHead=%s, LON=%s, LAT=%s, LON09=%s, LAT09=%s, TrueHeading=%s, ShipType=%s, UpdateDate='%s', ShipName='%s' where MMSI=%s",
@@ -910,9 +957,9 @@ void DBOperateThread() {
 									 shipName.c_str(),
 									 to_string(aisMessage.getMMSI()).c_str());
 						}
-						// ÏûÏ¢24£º¾²Ì¬Êı¾İ±¨¸æ
+						// æ¶ˆæ¯24ï¼šé™æ€æ•°æ®æŠ¥å‘Š
 						else if(aisMessage.getMESSAGETYPE() == 24){
-							// 24 AÀà
+							// 24 Aç±»
 							if(aisMessage.getPARTNUMBER() == 0){
 								snprintf(sqlData, sizeof(sqlData),
 										 "update ShipInfo set ShipName='%s', UpdateDate='%s' where MMSI=%s",
@@ -920,7 +967,7 @@ void DBOperateThread() {
 										 time_utils::NowtimeString().c_str(),
 										 to_string(aisMessage.getMMSI()).c_str());
 							}
-							// 24 BÀà
+							// 24 Bç±»
 							else{
 								snprintf(sqlData,sizeof(sqlData),
 										 "update ShipInfo set ShipType=%s, CallSign='%s', UpdateDate='%s' where MMSI=%s",
@@ -931,18 +978,18 @@ void DBOperateThread() {
 							}
 						}
 						else{
-							cout << "¸üĞÂ ShipInfo ±í£ºÎŞĞ§µÄÏûÏ¢ÀàĞÍ£º" << aisMessage.getMESSAGETYPE() << endl;
+							cout << "æ›´æ–° ShipInfo è¡¨ï¼šæ— æ•ˆçš„æ¶ˆæ¯ç±»å‹ï¼š" << aisMessage.getMESSAGETYPE() << endl;
 							continue;
 						}
-						// Ö´ĞĞsql
+						// æ‰§è¡Œsql
 						try {
 							if (conn != NULL && !conn->isClosed()) {
 								state->executeUpdate(sqlData);
 								mapShipInfo[aisMessage.getMMSI()] = to_string(aisMessage.getDATETIME());
-								cout << "¸üĞÂ±í ShipInfo Êı¾İ³É¹¦" << endl;
+								cout << "æ›´æ–°è¡¨ ShipInfo æ•°æ®æˆåŠŸ" << endl;
 							}
 							else {
-								cout << "¸üĞÂ±í ShipInfo Ê§°Ü£¬Á¬½Ó¶ªÊ§" << endl;
+								cout << "æ›´æ–°è¡¨ ShipInfo å¤±è´¥ï¼Œè¿æ¥ä¸¢å¤±" << endl;
 								continue;
 							}
 						}
@@ -953,7 +1000,7 @@ void DBOperateThread() {
 					}
 				}
 
-				// ²åÈëAISInfoCurDayºÍAISInfoHistory±í
+				// æ’å…¥AISInfoCurDayå’ŒAISInfoHistoryè¡¨
 				try{
 					char sqlCurDay[1024] = {0};
 					char sqlHistory[1024] = {0};
@@ -1020,14 +1067,14 @@ void DBOperateThread() {
 							 to_string(iter->id).c_str(),
 							 time_utils::NowDateString().c_str());
 
-					// Ö´ĞĞsql
+					// æ‰§è¡Œsql
 					try {
 						if (conn != NULL && !conn->isClosed()) {
 							state->executeUpdate(sqlCurDay);
 							state->executeUpdate(sqlHistory);
 						}
 						else {
-							cout << "²åÈë±í AISInfo Ê§°Ü£¬Á¬½Ó¶ªÊ§" << endl;
+							cout << "æ’å…¥è¡¨ AISInfo å¤±è´¥ï¼Œè¿æ¥ä¸¢å¤±" << endl;
 							continue;
 						}
 					}
@@ -1037,15 +1084,16 @@ void DBOperateThread() {
 					
 				}
 				catch (...){
-					cout << "²åÈëµ½AisInfo´íÎó" << endl;
+					cout << "æ’å…¥åˆ°AisInfoé”™è¯¯" << endl;
 				}
 			}
 			// end iterate vAISInfo
-			//cout << "´¦Àí " << vAISInfo.size() << " ÌõÊı¾İ" << endl;
+			//cout << "å¤„ç† " << vAISInfo.size() << " æ¡æ•°æ®" << endl;
 		}
 		catch (...){
 			cout << "Error while iterate vAISInfo" << endl;
 		}
 		vAISInfo.clear();
 	}
+	return;
 }

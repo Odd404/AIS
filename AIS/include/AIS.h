@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <mutex>
+#include <condition_variable>
 #include "AisMessage.h"
 using namespace std;
 
@@ -15,6 +16,7 @@ using namespace std;
 #define TIMEFOR_THREAD_SLEEP    500			//等待客户端请求线程睡眠时间
 #define TIMEFOR_THREAD_EXIT     5000
 #define TIMEFOR_THREAD_CLIENT   500			//客户端接收消息睡眠时间
+#define TIMEFOR_THREAD_CLEAN    1000
 
 extern bool licenseOK;
 
@@ -48,10 +50,13 @@ extern vector<AISInfo> vAISInfo;
 
 #ifdef WIN32
 //睡眠函数
-#define sleep(time)    Sleep(time);
+#define sleep_(time)    Sleep(time);
 #define snprintf       _snprintf
 #else
-#define sleep(time)    usleep(1000 * time);
+#define sleep_(time)    usleep(1000 * time);
+#define INVALID_SOCKET  -1
+#define SOCKET_ERROR    -1
+
 #endif
 
 
@@ -69,4 +74,4 @@ void DBOperateThread();
 #endif // !AIS_H_
 
 
-// TODO: 在此处引用程序需要的其他标头。
+//

@@ -1,21 +1,25 @@
 /**
  * @file path_utils.h
  *
- * Ê¹ÓÃC++ 17
+ * ä½¿ç”¨C++ 17
 */
 #ifndef SECPLATFORM_COMMON_PATHUTILS_H
 #define SECPLATFORM_COMMON_PATHUTILS_H
 
 #include <string>
 #include <algorithm>
+#ifdef WIN32
 #include <direct.h>
+#else
+#include <unistd.h>
+#endif
 namespace path_utils
 {
 
     /**
-    * #purpose	        : »ñµÃµ±Ç°³ÌĞòÄ¿Â¼
+    * #purpose	        : è·å¾—å½“å‰ç¨‹åºç›®å½•
     * #note	            :
-    * #return	        : µ±Ç°³ÌĞòÄ¿Â¼
+    * #return	        : å½“å‰ç¨‹åºç›®å½•
     */
 
     static const std::string GetCurrentDirPath()
@@ -26,10 +30,10 @@ namespace path_utils
 	}
 
     /**
-    * #purpose	        : »ñµÃµ±Ç°³ÌĞòÄ¿Â¼ÏÂµÄÄ³¸öÎÄ¼şÂ·¾¶
-    * #note	            : ²»»á¼ì²é¸ÃÂ·¾¶ÊÇ·ñ´æÔÚ
-    * #param path		: ×ÓÂ·¾¶
-    * #return	        : ÍêÕûÂ·¾¶
+    * #purpose	        : è·å¾—å½“å‰ç¨‹åºç›®å½•ä¸‹çš„æŸä¸ªæ–‡ä»¶è·¯å¾„
+    * #note	            : ä¸ä¼šæ£€æŸ¥è¯¥è·¯å¾„æ˜¯å¦å­˜åœ¨
+    * #param path		: å­è·¯å¾„
+    * #return	        : å®Œæ•´è·¯å¾„
     */
 
 	static const std::string GetPath(std::string path){

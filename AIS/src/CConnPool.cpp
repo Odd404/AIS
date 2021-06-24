@@ -4,12 +4,12 @@
 *  Created on: Mar 15, 2018
 *      Author: 
 * 
-*  ĞŞ¸ÄÓÚ£º2021.6.9
-*		Ê¹ÓÃc++ ±ê×¼¿â
+*  ä¿®æ”¹äºï¼š2021.6.9
+*		ä½¿ç”¨c++ æ ‡å‡†åº“
 *  
-*  ËµÃ÷£º
-*		Ê¹ÓÃconfig_file¶ÁÈ¡ÅäÖÃÎÄ¼ş
-*		³õÊ¼»¯Ê±²úÉú maxsize/2 ¸öÊı¾İ¿âÁ¬½Ó£¬È»ºó¸ù¾İĞèÇóÔÙÔö¼Ó£¬×î´ómaxsize
+*  è¯´æ˜ï¼š
+*		ä½¿ç”¨config_fileè¯»å–é…ç½®æ–‡ä»¶
+*		åˆå§‹åŒ–æ—¶äº§ç”Ÿ maxsize/2 ä¸ªæ•°æ®åº“è¿æ¥ï¼Œç„¶åæ ¹æ®éœ€æ±‚å†å¢åŠ ï¼Œæœ€å¤§maxsize
 */
 #include "general.h"
 
@@ -37,11 +37,11 @@ void CConnPool::InitConnpool(string url, string user, string password, int maxSi
 	}
 	catch (sql::SQLException &e)
 	{
-		perror("Çı¶¯Á¬½Ó³ö´í.\n");
+		perror("é©±åŠ¨è¿æ¥å‡ºé”™.\n");
 	}
 	catch (std::runtime_error &e)
 	{
-		perror("ÔËĞĞ³ö´íÁË.\n");
+		perror("è¿è¡Œå‡ºé”™äº†.\n");
 	}
 
 	this->InitConnection(maxSize / 2);
@@ -50,7 +50,7 @@ void CConnPool::InitConnpool(string url, string user, string password, int maxSi
 
 CConnPool::CConnPool(string url, string user, string password, int maxSize)
 {
-	//¶ÁÈ¡ÅäÖÃÎÄ¼ş
+	//è¯»å–é…ç½®æ–‡ä»¶
 	try
 	{
 		string filePath = path_utils::GetPath("/config/AisDaemon.conf");
@@ -63,7 +63,7 @@ CConnPool::CConnPool(string url, string user, string password, int maxSize)
 	}
 	catch (...)
 	{
-		perror("¶ÁÈ¡ÅäÖÃÎÄ¼ş³ö´í.\n");
+		perror("è¯»å–é…ç½®æ–‡ä»¶å‡ºé”™.\n");
 	}
 	
 	this->maxSize = maxSize;
@@ -78,11 +78,11 @@ CConnPool::CConnPool(string url, string user, string password, int maxSize)
 	}
 	catch (sql::SQLException &e)
 	{
-		perror("Çı¶¯Á¬½Ó³ö´í.\n");
+		perror("é©±åŠ¨è¿æ¥å‡ºé”™.\n");
 	}
 	catch (std::runtime_error &e)
 	{
-		perror("ÔËĞĞ³ö´íÁË.\n");
+		perror("è¿è¡Œå‡ºé”™äº†.\n");
 	}
 
 	this->InitConnection(maxSize / 2);
@@ -117,7 +117,7 @@ void CConnPool::InitConnection(int num)
 		}
 		else
 		{
-			perror("´´½¨Connection³ö´í.");
+			perror("åˆ›å»ºConnectionå‡ºé”™.");
 		}
 	}
 
@@ -134,17 +134,17 @@ Connection *CConnPool::CreateConnection()
 			perror("driver is null");
 		}
 
-		//.c_str()ºó´«ÈëµÄ²ÎÊıÀàĞÍÊÇ char ×Ö·û´® £¬²»¸ÄÊÇstring¶ÔÏó
-		//MysqlµÄ²ÎÊıÊÇ×Ô¶¨Òå²ÎÊı£¬ÓëstringÀàĞÍ²»Ò»ÖÂ
-		//_conn = driver->connect(url, user, password); //½¨Á¢Á¬½Ó
-		_conn = driver->connect(url.c_str(), user.c_str(), password.c_str()); //½¨Á¢Á¬½Ó
+		//.c_str()åä¼ å…¥çš„å‚æ•°ç±»å‹æ˜¯ char å­—ç¬¦ä¸² ï¼Œä¸æ”¹æ˜¯stringå¯¹è±¡
+		//Mysqlçš„å‚æ•°æ˜¯è‡ªå®šä¹‰å‚æ•°ï¼Œä¸stringç±»å‹ä¸ä¸€è‡´
+		//_conn = driver->connect(url, user, password); //å»ºç«‹è¿æ¥
+		_conn = driver->connect(url.c_str(), user.c_str(), password.c_str()); //å»ºç«‹è¿æ¥
 
 		if (_conn == NULL)
 		{
 			perror("_conn is null");
 		}
 
-		perror("Á¬½ÓÊı¾İ¿â³É¹¦.");
+		perror("è¿æ¥æ•°æ®åº“æˆåŠŸ.");
 
 		return _conn;
 	}
@@ -209,7 +209,7 @@ Connection *CConnPool::GetConnection()
 		}
 		else
 		{
-			cout << "³¬³ö×î´óÁ¬½Ó." << endl;
+			cout << "è¶…å‡ºæœ€å¤§è¿æ¥." << endl;
 			return NULL;
 		}
 	}

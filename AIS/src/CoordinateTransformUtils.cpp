@@ -106,7 +106,7 @@ Coordinate CoordinateTransformUtils::wgs84todb09(double lng, double lat)
 	double mglat = lat + dlat;
 	double mglng = lng + dlng;
 
-	//µÚ¶ş´Î×ª»»
+	//ç¬¬äºŒæ¬¡è½¬æ¢
 	double z = sqrt(mglng * mglng + mglat * mglat) + 0.00002 * sin(mglat * x_PI);
 	double theta = atan2(mglat, mglng) + 0.000003 * cos(mglng * x_PI);
 

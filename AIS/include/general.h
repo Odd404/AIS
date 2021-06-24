@@ -12,6 +12,8 @@
 #ifdef WIN32
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib, "mysqlcppconn-static.lib")
+#else
+#include <unistd.h>
 #endif
 
 #endif //AISDAEMON_GENERAL_H

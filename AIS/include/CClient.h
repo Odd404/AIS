@@ -5,7 +5,7 @@
 #include <mutex>
 #include <condition_variable>
 
-//ÍøÂç²¿·Ö£¬²»Í¬»·¾³µÄÉèÖÃ
+//ç½‘ç»œéƒ¨åˆ†ï¼Œä¸åŒç¯å¢ƒçš„è®¾ç½®
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -13,7 +13,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-typedef size_t SOCKET
+typedef size_t SOCKET;
 #endif
 
 #define MAX_NUM_BUF 4096
@@ -22,38 +22,38 @@ using namespace std;
 class CClient
 {
 private:
-	SOCKET                  m_socket;			//Ì×½Ó×Ö
-	sockaddr_in             m_addr;			//µØÖ·
-	bool m_bConning;			//¿Í»§¶ËÁ¬½Ó×´Ì¬
-	bool m_bExit;				//Ïß³ÌÍË³ö
+	SOCKET                  m_socket;			//å¥—æ¥å­—
+	sockaddr_in             m_addr;			//åœ°å€
+	bool m_bConning;			//å®¢æˆ·ç«¯è¿æ¥çŠ¶æ€
+	bool m_bExit;				//çº¿ç¨‹é€€å‡º
 private:
 	CClient();
 
 public:
 	CClient(const SOCKET sClient, const sockaddr_in& addrClient);
 
-	static void RecvDataThread(void* pParam);	//½ÓÊÕ¿Í»§¶ËÊı¾İ
-	static void HandleDataThread(void* pParam);	//´¦ÀíaisMessage
+	static void RecvDataThread(void* pParam);	//æ¥æ”¶å®¢æˆ·ç«¯æ•°æ®
+	static void HandleDataThread(void* pParam);	//å¤„ç†aisMessage
 
 	virtual ~CClient();
 
 public:
-	void GetConnPoolInit();					//³õÊ¼»¯Êı¾İ¿âÁ¬½Ó³Ø
+	void GetConnPoolInit();					//åˆå§‹åŒ–æ•°æ®åº“è¿æ¥æ± 
 
-	bool StartRuning();					//´´½¨·¢ËÍºÍ½ÓÊÕÊı¾İÏß³Ì
-	bool ParseData(const char* pExpr);		//¼ÆËã±í´ïÊ½£­´¦ÀíÊı¾İ
+	bool StartRuning();					//åˆ›å»ºå‘é€å’Œæ¥æ”¶æ•°æ®çº¿ç¨‹
+	bool ParseData(const char* pExpr);		//è®¡ç®—è¡¨è¾¾å¼ï¼å¤„ç†æ•°æ®
 
 	bool IsConning(void)
 	{
 		return m_bConning;
 	}
 
-	void DisConning(void)					//¶Ï¿ªÓë¿Í»§¶ËµÄÁ¬½Ó
+	void DisConning(void)					//æ–­å¼€ä¸å®¢æˆ·ç«¯çš„è¿æ¥
 	{
 		m_bConning = false;
 	}
 
-	bool IsExit(void)						//½ÓÊÕºÍ·¢ËÍÏß³ÌÊÇ·ñÒÑ¾­ÍË³ö
+	bool IsExit(void)						//æ¥æ”¶å’Œå‘é€çº¿ç¨‹æ˜¯å¦å·²ç»é€€å‡º
 	{
 		return m_bExit;
 	}
